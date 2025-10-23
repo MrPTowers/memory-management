@@ -3,25 +3,25 @@ class Node:
 		self.data = data
 		self.next = None
 
-class PageTable:
+class PageFrame:
 	def __init__(self, id):
 		self.id = id
 		self.access = 0 #Amount of times page has been accessed
 		self.bit = 0 #Reference bit for Second Chance and WSClock
 	
-	def toggle_bit(self, bit):
+	def toggleBit(self):
 		if self.bit == 0:
 			self.bit = 1
 		else:
 			self.bit = 0
 
-    def __eq__(self, other):
-        if isinstance(other, PageTable):
-            return self.id == other.id
-        return False
+	def __eq__(self, other):
+		if isinstance(other, PageFrame):
+			return self.id == other.id
+		return False
 
 class CircularLinkedList:
-	def __init__(self, max)
+	def __init__(self, max):
 		self.head = None
 		self.max = max
 		self.size = 0
@@ -44,51 +44,60 @@ class CircularLinkedList:
 			self.size +=1
 
 	def search(self, data):
-    	if not self.head:
-        	return False
+		if not self.head:
+			return False
 
-    	curr = self.head
-    	while True:
-        	if curr.data == data:
-            	return True
-        	curr = curr.next
-        	if curr == self.head:
-            	break
-    	return False
+		curr = self.head
+		while True:
+			if curr.data == data:
+				return True
+			curr = curr.next
+			if curr == self.head:
+				break
+			return False
 
 	def remove(self, data):
-    	if not self.head:
-        	return False
+		if not self.head:
+			return False
 
-    	curr = self.head
-    	prev = None
+		curr = self.head
+		prev = None
+		while True:
+			if curr.data == data:
+				if curr == self.head and curr.next == self.head:
+					self.head = None
+				elif curr == self.head:
+					tail = self.head
+					while tail.next != self.head:
+						tail = tail.next
+					tail.next = curr.next
+					self.head = curr.next
+				else:
+					prev.next = curr.next
+				self.size -= 1
+				return True
 
-    	while True:
-        	if curr.data == data:
-            	if curr == self.head and curr.next == self.head:
-                	self.head = None
-            	elif curr == self.head:
-                	tail = self.head
-                	while tail.next != self.head:
-                    	tail = tail.next
-                	tail.next = curr.next
-                	self.head = curr.next
-            	else:
-                	prev.next = curr.next
-            	self.size -= 1
-            	return True
+			prev = curr
+			curr = curr.next
 
-        	prev = curr
-        	curr = curr.next
-
-        	if curr == self.head:
-            	break
-    	return False
+			if curr == self.head:
+				break
+			return False
 
 	def replace(self, old, new):
-    	removed = self.remove(old)
-    	if removed:
-        	return self.append(new)
-    	return False
+		removed = self.remove(old)
+		if removed:
+			return self.append(new)
+		return False
+
+	def __getitem__(self, index):
+		if not self.head or index < 0 or index >= self.size:
+			raise IndexError("Index out of range")
+
+		curr = self.head
+		for _ in range(index):
+			curr = curr.next
+		return curr.data
+
 
 
