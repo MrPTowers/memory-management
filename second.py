@@ -2,41 +2,62 @@ from classes import PageFrame, CircularLinkedList
 import sys
 
 file = sys.argv[2]
-max_size = sys.argv[1]
+max_size = int(sys.argv[1])
 
 physical_memory = CircularLinkedList(max_size)
-page_table = []
 
 def main():
+
+	global physical_memory 
+	page_table = [] #Table for access to Page Frame objects
+	page_hits = 0
+	page_faults = 0
 
 	instructions = parseInstructionFile(file)
 	for i in instructions:
 		i_pair = i.split(':') #Parsing the string into instruction and page id pair
-		instruction = split[0]
-		page = PageFrame(split[1]) #Create page frame for page
+		#instruction = i_pair[0] This would go here if we were actually running the operations on the pages		
+		page = PageFrame(i_pair[1]) #Create page frame for page
 
 		if page not in page_table: #Check to see if page has already been made. If so, we will be using the existing Page Frame 
 			page_table.append(page)
-			page_idx = page_table.index(page)
+			page_idx = page_table.index(page) #Extract index of page for updating later
 		else:
 			page_idx = page_table.index(page)
-			page = page_table[page_idx] #Replace page frame with existing
-		
-		if physical_memory.size == 0: #First entry
-			physical_memory.append(page)
-			page.access += 1
-		elif physical_memory.search(page): #Hit
-			page.access += 1
-			if (page.bit == 0):
-				page.toggleBit()
-			else:
-				continue
-		elif not physical_memory.search(page): #Page not in physical memory
-			
-			
-		
 
-def parseInstructionFile(file):
+		#Start of second chance page replacement algorithm
+
+		if physical_memory.size == 0: #First entry
+			physical_memory.append(page_table[page_idx]) #Insert into linked list
+			page_table[page_idx].access += 1 #Increment visit amount
+			page_faults += 1 #Add to page faults	
+		elif physical_memory.search(page_table[page_idx]): #Page Hit
+			page_table[page_idx].access += 1
+			page_hits += 1 #Add to page hits
+			if (page_table[page_idx].bit == 0):
+				page_table[page_idx].toggleBit()
+			continue
+		else: #Page not in physical memory
+			if physical_memory.size == max_size: #Memory is full
+				for idx in range(physical_memory.size):
+					if physical_memory[idx].bit == 0: #Page fault
+						physical_memory.replace(physical_memory[idx], page_table[page_idx]) #Remove old page and add new
+						page_table[page_idx].access += 1
+						page_faults += 1
+						break
+					else:
+						physical_memory[idx].toggleBit() #Remove the second chance
+			else: #Memory is not full. Append new page
+				physical_memory.append(page_table[page_idx])
+				page_table[page_idx].access += 1
+				page_faults += 1
+
+	print(f"Page Hits: {page_hits} Page Faults: {page_faults}\n") #Display all results
+	print("Page access amounts:\n")
+	for page in page_table:
+		print(f"Page {page.id}: Accessed {page.access} times")
+
+def parseInstructionFile(file): #Parse file regardless of if delimiters are newlines or whitespace
 	instructions = []
 	with open(file, "r") as f:
 		for line in f:

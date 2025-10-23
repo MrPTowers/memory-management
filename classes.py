@@ -54,7 +54,7 @@ class CircularLinkedList:
 			curr = curr.next
 			if curr == self.head:
 				break
-			return False
+		return False
 
 	def remove(self, data):
 		if not self.head:
