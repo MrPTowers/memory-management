@@ -92,5 +92,5 @@ if __name__ == "__main__":
     	main()
     else:
     	#Disclose correct usage of program
-        print("Usage: python3 optimal.py <number of physical memory pages> <access sequence file>")
+        print("Usage: python3 optimal.py <number_of_physical_memory_pages> <access_sequence_file>")
         sys.exit(1)

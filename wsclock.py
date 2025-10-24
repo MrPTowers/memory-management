@@ -14,7 +14,7 @@ def main():
 	page_hits = 0
 	page_faults = 0
 	clock_hand = None #Clock hand for WSClock algorithm
-	pc = 0 #Program counter
+	pc = 1 #Program counter
 
 	instructions = parseInstructionFile(file)
 	for i in instructions:
@@ -36,14 +36,14 @@ def main():
 			page_faults += 1 #Add to page faults	
 			
 			clock_hand = physical_memory.head #Clock hand will stay here until the list is filled
-			physical_memory[0].last_access = pc + 1 #Update the last time page was accessed on memory
+			physical_memory[0].last_access = pc #Update the last time page was accessed on memory
 			
 		elif physical_memory.search(page_table[page_idx]): #Page Hit
 			page_table[page_idx].access += 1
 			page_hits += 1 #Add to page hits
 			for idx in range(physical_memory.size): #Find the element in the list that corresponds to the page hit
 				if page_table[page_idx].id == physical_memory[idx]:
-					physical_memory[idx].last_access = pc + 1 
+					physical_memory[idx].last_access = pc
 					if physical_memory[idx].bit == 0: 
 						physical_memory[idx].toggleBit() #Turn reference bit to 1
 						break
@@ -54,7 +54,7 @@ def main():
 				while True: #Main WSClock logic
 					if pages_visited == max_size: #If a full loop has been made, remove the oldest page
 						physical_memory.replaceInPlace(greatest_age_page, page_table[page_idx])
-						clock_hand.data.last_access = pc + 1
+						clock_hand.data.last_access = pc
 						clock_hand = clock_hand.next #Advance the clock hand to next node
 						page_table[page_idx].access += 1
 						page_faults += 1
@@ -62,7 +62,7 @@ def main():
 					elif clock_hand.data.bit == 0: #Reference bit 0
 						if pc - clock_hand.data.last_access > tau: #Current time - page's last access time > tau
 							physical_memory.replaceInPlace(clock_hand, page_table[page_idx]) #Both conditions have been filled
-							clock_hand.data.last_access = pc + 1
+							clock_hand.data.last_access = pc
 							clock_hand = clock_hand.next
 							page_table[page_idx].access += 1 
 							page_faults += 1
@@ -79,7 +79,7 @@ def main():
 	
 			else: #Memory is not full. Append new page
 				physical_memory.append(page_table[page_idx])
-				physical_memory[physical_memory.size - 1].last_access = pc + 1
+				physical_memory[physical_memory.size - 1].last_access = pc
 				page_table[page_idx].access += 1
 				page_faults += 1
 		pc += 1 #Since at this point a page fault or page hit must happen, update program counter (time)
@@ -103,5 +103,5 @@ if __name__ == "__main__":
     	main()
     else:
     	#Disclose correct usage of program
-        print("Usage: python3 wsclock.py <number of physical memory pages> <tau> <access sequence file>")
+        print("Usage: python3 wsclock.py <number_of_physical_memory_pages> <tau> <access_sequence_file>")
         sys.exit(1)
