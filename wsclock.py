@@ -1,4 +1,3 @@
-
 from classes import PageFrame, CircularLinkedList
 import sys
 
@@ -14,8 +13,8 @@ def main():
 	page_table = [] #Table for access to Page Frame objects
 	page_hits = 0
 	page_faults = 0
-	clock_hand = None
-	pc = 0
+	clock_hand = None #Clock hand for WSClock algorithm
+	pc = 0 #Program counter
 
 	instructions = parseInstructionFile(file)
 	for i in instructions:
@@ -44,27 +43,46 @@ def main():
 			page_hits += 1 #Add to page hits
 			for idx in range(physical_memory.size): #Find the element in the list that corresponds to the page hit
 				if page_table[page_idx].id == physical_memory[idx]:
-					physical_memory[idx].last_access = pc + 1
-					if physical_memory[idx].bit == 0:
+					physical_memory[idx].last_access = pc + 1 
+					if physical_memory[idx].bit == 0: 
 						physical_memory[idx].toggleBit() #Turn reference bit to 1
 						break
 		else: #Page not in physical memory
 			if physical_memory.size == max_size: #Memory is full
-				while True:
-					if clock_hand.bit == 0:
-						if pc - clock_hand.last_access > tau:
-
-							clock_hand.last_access = pc + 1
-					elif
-
-				#Actual WSClock logic
-
-
+				greatest_age_page = clock_hand.data
+				pages_visited = 0
+				while True: #Main WSClock logic
+					if pages_visited == max_size: #If a full loop has been made, remove the oldest page
+						physical_memory.replaceInPlace(greatest_age_page, page_table[page_idx])
+						clock_hand.data.last_access = pc + 1
+						clock_hand = clock_hand.next #Advance the clock hand to next node
+						page_table[page_idx].access += 1
+						page_faults += 1
+						break
+					elif clock_hand.data.bit == 0: #Reference bit 0
+						if pc - clock_hand.data.last_access > tau: #Current time - page's last access time > tau
+							physical_memory.replaceInPlace(clock_hand, page_table[page_idx]) #Both conditions have been filled
+							clock_hand.data.last_access = pc + 1
+							clock_hand = clock_hand.next
+							page_table[page_idx].access += 1 
+							page_faults += 1
+							break
+						else: #If the time constraint is not met, keep track of oldest page
+							if clock_hand.data.last_access < greatest_age_page.last_access:
+								greatest_age_page = clock_hand.data #Update oldest page
+								clock_hand = clock_hand.next
+							else:
+								clock_hand = clock_hand.next
+					else: #Reference bit 1
+						clock_hand.data.toggleBit()
+						clock_hand = clock_hand.next
 	
 			else: #Memory is not full. Append new page
 				physical_memory.append(page_table[page_idx])
+				physical_memory[physical_memory.size - 1].last_access = pc + 1
 				page_table[page_idx].access += 1
 				page_faults += 1
+		pc += 1 #Since at this point a page fault or page hit must happen, update program counter (time)
 
 	print(f"Page Hits: {page_hits} Page Faults: {page_faults}") #Display all results
 	print("Page access amounts:\n")
@@ -78,21 +96,6 @@ def parseInstructionFile(file): #Parse file regardless of if delimiters are newl
 			line_instructions = line.split()
 			instructions.extend(line_instructions)
 	return instructions
-
-
-	print(f"Page Hits: {page_hits} Page Faults: {page_faults}\n")
-	print("Page access amounts:\n")
-	for page in page_table:
-		print(f"Page {page.id}: {page.access}")
-
-def parseInstructionFile(file):
-	instructions = []
-	with open(file, "r") as f:
-		for line in f:
-			line_instructions = line.split()
-			instructions.extend(line_instructions)
-	return instructions
-
 
 if __name__ == "__main__":
     #Check to see if program is run with the correct amount of arguments

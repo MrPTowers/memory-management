@@ -6,9 +6,9 @@ class Node:
 class PageFrame:
 	def __init__(self, id):
 		self.id = id
-		self.access = 0 #Amount of times page has been accessed
-		self.bit = 0 #Reference bit for Second Chance and WSClock
-		self.last_access = 0 #Last Access timefor WSClock
+		self.access = 0
+		self.bit = 0
+		self.last_access = 0
 	
 	def toggleBit(self):
 		if self.bit == 0:
@@ -90,6 +90,22 @@ class CircularLinkedList:
 		if removed:
 			return self.append(new)
 		return False
+
+	def replaceInPlace(self, old, new):
+		if not self.head:
+			return False
+
+		curr = self.head
+		while True:
+			if curr.data == old:
+				curr.data = new
+				return True
+			curr = curr.next
+			if curr == self.head:
+				break
+			return False
+
+
 
 	def __getitem__(self, index):
 		if not self.head or index < 0 or index >= self.size:
