@@ -49,32 +49,30 @@ def main():
 			page_hits += 1 #Add to page hits
 		else: #Page not in physical memory
 			if physical_memory.size == max_size: #Memory is full
-				latest_access = [0, 0]
+				#latest_access is a tuple that consists of the idx of the page in memory and the idx of its next mention in the instruction array
+				latest_access = [0, 0] 
 				for j in range(0, max_size): #Use the preprocessed page indexes dictionary to find the page with the latest access
 					remaining_instructions = list(filter(
 											lambda x: x > instruction_idx, 
 											page_idxs[physical_memory[j].id]))
 					if not remaining_instructions: #If the remaining_instructions array is null, prep this page for removal
-						latest_access = [physical_memory[j].id, -1]
+						latest_access = [j, -1]	
 						break
 					elif remaining_instructions[0] > latest_access[1]: #If the next instruction is later than the current latest, overwrite
-						latest_access = [physical_memory[j].id, next_instruction_idx]
+						latest_access = [j, remaining_instructions[0]]
 					else:
 						continue
-				if latest_access[1] == -1: #See if any pages are not referenced again
-					physical_memory.replace(physical_memory[latest_access[0]], page_table[page_idx])
-					page_table[page_idx].access += 1
-					page_faults += 1
-				else:
-					
-
+				#Whether the for loop breaks early or not, same thing happens
+				physical_memory.replace(physical_memory[latest_access[0]], page_table[page_idx])
+				page_table[page_idx].access += 1
+				page_faults += 1
 			else: #Memory is not full. Append new page
 				physical_memory.append(page_table[page_idx])
 				page_table[page_idx].access += 1
 				page_faults += 1
 		instruction_idx += 1
 
-	print(f"Page Hits: {page_hits} Page Faults: {page_faults}\n") #Display all results
+	print(f"Page Hits: {page_hits} Page Faults: {page_faults}") #Display all results
 	print("Page access amounts:\n")
 	for page in page_table:
 		print(f"Page {page.id}: Accessed {page.access} times")

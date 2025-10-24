@@ -8,6 +8,7 @@ class PageFrame:
 		self.id = id
 		self.access = 0 #Amount of times page has been accessed
 		self.bit = 0 #Reference bit for Second Chance and WSClock
+		self.last_access = 0 #Last Access timefor WSClock
 	
 	def toggleBit(self):
 		if self.bit == 0:

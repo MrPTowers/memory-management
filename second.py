@@ -34,25 +34,27 @@ def main():
 		elif physical_memory.search(page_table[page_idx]): #Page Hit
 			page_table[page_idx].access += 1
 			page_hits += 1 #Add to page hits
-			if (page_table[page_idx].bit == 0):
-				page_table[page_idx].toggleBit()
-			continue
+			for idx in range(physical_memory.size): #Find the element in the list that corresponds to the page hit
+				if page_table[page_idx].id == physical_memory[idx]:
+					if physical_memory[idx].bit == 0:
+						physical_memory[idx].toggleBit() #Turn second chance bit to 1
+						break
 		else: #Page not in physical memory
 			if physical_memory.size == max_size: #Memory is full
-				for idx in range(physical_memory.size):
+				for idx in range(max_size):
 					if physical_memory[idx].bit == 0: #Page fault
 						physical_memory.replace(physical_memory[idx], page_table[page_idx]) #Remove old page and add new
 						page_table[page_idx].access += 1
 						page_faults += 1
 						break
 					else:
-						physical_memory[idx].toggleBit() #Remove the second chance
+						physical_memory[idx].toggleBit #Return second chance bit to 0
 			else: #Memory is not full. Append new page
 				physical_memory.append(page_table[page_idx])
 				page_table[page_idx].access += 1
 				page_faults += 1
 
-	print(f"Page Hits: {page_hits} Page Faults: {page_faults}\n") #Display all results
+	print(f"Page Hits: {page_hits} Page Faults: {page_faults}") #Display all results
 	print("Page access amounts:\n")
 	for page in page_table:
 		print(f"Page {page.id}: Accessed {page.access} times")
